@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Admin — WorkFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        radial-gradient(circle at 10% 20%, #0a0a1a, #000000);
+            --white:     rgba(255, 255, 255, 0.05);
+            --sidebar:   rgba(10, 10, 15, 0.9);
+            --primary:   #0a84ff;
+            --primary-light: rgba(10, 132, 255, 0.1);
+            --green:     #30d158;
+            --green-bg:  rgba(48, 209, 88, 0.1);
+            --amber:     #ff9f0a;
+            --amber-bg:  rgba(255, 159, 10, 0.1);
+            --rose:      #ff3b30;
+            --rose-bg:   rgba(255, 59, 48, 0.1);
+            --blue-bg:   rgba(10, 132, 255, 0.1);
+            --violet:    #bf5af2;
+            --violet-bg: rgba(191, 90, 242, 0.1);
+            --text:      #ffffff;
+            --text-2:    rgba(255, 255, 255, 0.9);
+            --text-3:    rgba(255, 255, 255, 0.6);
+            --text-4:    rgba(255, 255, 255, 0.4);
+            --border:    rgba(255, 255, 255, 0.1);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow:    0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0a1a, #000000);
+            color: #ffffff;
+            font-family: -apple-system, 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: 230px;
+            min-height: 100vh;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-logo {
+            padding: 28px 22px 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .logo-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #0a84ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-name span { color: #60a5fa; }
+
+        .logo-tag {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            margin-top: 3px;
+        }
+
+        .sidebar-nav { padding: 18px 10px; flex: 1; }
+
+        .nav-group-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            color: rgba(255,255,255,0.2);
+            padding: 0 12px;
+            margin-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .nav-group-label:first-child { margin-top: 0; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 0.79rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.38);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 1px;
+            user-select: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.72);
+        }
+
+        .nav-item.active {
+            background: rgba(37,99,235,0.2);
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        .nav-item svg {
+            width: 16px; height: 16px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .nav-item.active svg { opacity: 1; }
+
+        .nav-item .nav-badge {
+            margin-left: auto;
+            background: rgba(37,99,235,0.3);
+            color: #93c5fd;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 100px;
+        }
+
+        .sidebar-footer {
+            padding: 14px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.67rem;
+            color: rgba(255,255,255,0.25);
+        }
+
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 6px #22c55e;
+            animation: blink 2s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ─── MAIN ─── */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        .topbar {
+            background: rgba(10, 10, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 36px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+        .topbar-sub   { font-size: 0.68rem; color: var(--text-3); margin-top: 1px; }
+
+        .sync-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            background: var(--green-bg);
+            border: 1px solid #bbf7d0;
+            border-radius: 100px;
+            font-size: 0.67rem;
+            font-weight: 700;
+            color: var(--green);
+            letter-spacing: 0.4px;
+        }
+
+        .sync-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: blink 1.8s infinite;
+        }
+
+        .content { padding: 30px 36px; flex: 1; }
+
+        /* ─── VIEWS (pages) ─── */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ─── PAGE HEADER ─── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle { font-size: 0.75rem; color: var(--text-3); margin-top: 3px; }
+
+        .update-info { font-size: 0.67rem; color: var(--text-4); text-align: right; line-height: 1.6; }
+        .update-info strong { color: var(--text-3); font-weight: 500; }
+        #countdown { color: var(--primary); font-weight: 700; }
+
+        /* ─── STATS ─── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .stat:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .stat-icon {
+            width: 36px; height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon svg { width: 17px; height: 17px; fill: none; stroke-width: 1.9; }
+
+        .stat.s-green .stat-icon { background: var(--green-bg); }
+        .stat.s-green .stat-icon svg { stroke: var(--green); }
+        .stat.s-blue  .stat-icon { background: var(--blue-bg); }
+        .stat.s-blue  .stat-icon svg { stroke: var(--primary); }
+        .stat.s-amber .stat-icon { background: var(--amber-bg); }
+        .stat.s-amber .stat-icon svg { stroke: var(--amber); }
+        .stat.s-rose  .stat-icon { background: var(--rose-bg); }
+        .stat.s-rose  .stat-icon svg { stroke: var(--rose); }
+
+        .stat-pill {
+            font-size: 0.61rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 100px;
+            letter-spacing: 0.3px;
+        }
+
+        .stat.s-green .stat-pill { background: var(--green-bg); color: var(--green); }
+        .stat.s-blue  .stat-pill { background: var(--blue-bg); color: var(--primary); }
+        .stat.s-amber .stat-pill { background: var(--amber-bg); color: var(--amber); }
+        .stat.s-rose  .stat-pill { background: var(--rose-bg); color: var(--rose); }
+
+        .stat-num {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .stat-label { font-size: 0.7rem; color: var(--text-3); font-weight: 500; }
+
+        .stat::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px; width: 45%;
+            border-radius: 0 4px 0 0;
+        }
+
+        .stat.s-green::after { background: var(--green); }
+        .stat.s-blue::after  { background: var(--primary); }
+        .stat.s-amber::after { background: var(--amber); }
+        .stat.s-rose::after  { background: var(--rose); }
+
+        /* ─── TABLE CARD ─── */
+        .table-card {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tc-title { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+        .tc-sub   { font-size: 0.67rem; color: var(--text-3); margin-top: 1px; }
+
+        .tc-count {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-3);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
+
+        thead tr { background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid var(--border); }
+
+        th {
+            padding: 10px 18px;
+            text-align: left;
+            font-size: 0.61rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            color: var(--text-3);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            white-space: nowrap;
+            color: var(--text-2);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: all 0.2s; }
+        tbody tr:hover td { background: rgba(10, 132, 255, 0.05); }
+
+        /* ─── BADGES ─── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.61rem;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .bdot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+        .badge-usuario { background: var(--blue-bg); color: var(--primary); border: 1px solid #bfdbfe; }
+        .badge-usuario .bdot { background: var(--primary); }
+        .badge-empresa { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
+        .badge-empresa .bdot { background: var(--amber); }
+        .badge-admin   { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+        .badge-admin .bdot { background: var(--green); }
+        .badge-activo  { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+        .badge-activo .bdot { background: var(--green); }
+        .badge-inactivo{ background: var(--rose-bg); color: var(--rose); border: 1px solid #fecaca; }
+        .badge-inactivo .bdot { background: var(--rose); }
+
+        .id-cell   { font-size: 0.7rem; color: var(--text-4); font-family: 'Inter', monospace; }
+        .name-cell { font-weight: 700; color: var(--text); }
+
+        .password-cell {
+            font-family: 'Inter', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--amber);
+            background: var(--amber-bg);
+            padding: 2px 9px;
+            border-radius: 5px;
+            border: 1px solid #fde68a;
+            display: inline-block;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-3);
+            font-size: 0.8rem;
+        }
+
+        .new-row td { animation: nrhighlight 2.5s ease-out forwards; }
+        @keyframes nrhighlight { 0%{background:#eff6ff} 100%{background:transparent} }
+
+        /* ─── REPORTES ─── */
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .report-card {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .report-card-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-card-title svg { width: 15px; height: 15px; fill: none; stroke-width: 2; }
+
+        .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+
+        .bar-row { display: flex; flex-direction: column; gap: 5px; }
+
+        .bar-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+        }
+
+        .bar-name { color: var(--text-2); font-weight: 500; }
+        .bar-val  { color: var(--text-3); font-weight: 600; }
+
+        .bar-track {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .bar-fill.blue   { background: var(--primary); }
+        .bar-fill.amber  { background: var(--amber); }
+        .bar-fill.green  { background: var(--green); }
+
+        .donut-wrap {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .donut-svg { flex-shrink: 0; }
+
+        .donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+        }
+
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .legend-name { color: var(--text-2); font-weight: 500; flex: 1; }
+        .legend-val  { color: var(--text-3); font-weight: 600; }
+
+        .stat-rows { display: flex; flex-direction: column; gap: 12px; }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .stat-row-label { font-size: 0.74rem; font-weight: 500; color: var(--text-2); }
+
+        .stat-row-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* ─── CONFIGURACION ─── */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .config-card {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 26px 28px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .config-card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .config-card-sub {
+            font-size: 0.7rem;
+            color: var(--text-3);
+            margin-bottom: 22px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-2);
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 9px 13px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .form-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-toggle:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .toggle-info .toggle-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .toggle-info .toggle-sub {
+            font-size: 0.68rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .switch {
+            position: relative;
+            width: 38px; height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            left: 3px; top: 3px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .switch input:checked + .slider { background: var(--primary); }
+        .switch input:checked + .slider::before { transform: translateX(16px); }
+
+        .btn-save {
+            background: linear-gradient(135deg, #0a84ff, #0066cc);
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .btn-save:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .btn-save:active { transform: translateY(0); }
+
+        /* CONSTRUCCION */
+        .wip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .wip-icon {
+            width: 52px; height: 52px;
+            background: var(--blue-bg);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .wip-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--primary); stroke-width: 1.8; }
+        .wip-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .wip-sub   { font-size: 0.78rem; color: var(--text-3); max-width: 320px; line-height: 1.6; }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-name">Work<span>Flow</span></div>
+        <div class="logo-tag">Administración</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-group-label">General</div>
+
+        <div class="nav-item active" data-view="monitor">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Monitor en vivo
+            <span class="nav-badge" id="nb-monitor">0</span>
+        </div>
+
+        <div class="nav-item" data-view="usuarios">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Usuarios
+            <span class="nav-badge" id="nb-usuarios">0</span>
+        </div>
+
+        <div class="nav-item" data-view="empresas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 7v14M21 7v14M6 21V7M18 21V7M3 7l9-4 9 4M9 21v-4h6v4"/></svg>
+            Empresas
+            <span class="nav-badge" id="nb-empresas">0</span>
+        </div>
+
+        <div class="nav-group-label">Sistema</div>
+
+        <div class="nav-item" data-view="config">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Configuración
+        </div>
+
+        <div class="nav-item" data-view="reportes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Reportes
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            Actualiza cada <span id="countdown" style="color:rgba(255,255,255,0.4);margin:0 3px">5</span>s
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" id="topbar-title">Monitor en vivo</div>
+            <div class="topbar-sub">WorkFlow — Panel de administración</div>
+        </div>
+        <div class="sync-chip">
+            <div class="sync-dot"></div>
+            EN VIVO
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ══════════ VIEW: MONITOR ══════════ -->
+        <div class="view active" id="view-monitor">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Monitor en vivo</div>
+                    <div class="page-subtitle">Todos los registros del sistema en tiempo real</div>
+                </div>
+                <div class="update-info">
+                    Última actualización<br>
+                    <strong id="ultimaActualizacion">—</strong>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat s-green">
+                    <div class="stat-top">
+                        <div class="stat-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l5-5 4 4 6-6 3 3"/></svg></div>
+                        <span class="stat-pill">Total</span>
+                    </div>
+                    <div class="stat-num" id="statTotal">0</div>
+                    <div class="stat-label">Total registros</div>
+                </div>
+                <div class="stat s-blue">
+                    <div class="stat-top">
+                        <div class="stat-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a9 9 0 0115 0"/></svg></div>
+                        <span class="stat-pill">Personas</span>
+                    </div>
+                    <div class="stat-num" id="statUsuarios">0</div>
+                    <div class="stat-label">Usuarios registrados</div>
+                </div>
+                <div class="stat s-amber">
+                    <div class="stat-top">
+                        <div class="stat-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg></div>
+                        <span class="stat-pill">Empresas</span>
+                    </div>
+                    <div class="stat-num" id="statEmpresas">0</div>
+                    <div class="stat-label">Empresas registradas</div>
+                </div>
+                <div class="stat s-rose">
+                    <div class="stat-top">
+                        <div class="stat-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg></div>
+                        <span class="stat-pill">Hoy</span>
+                    </div>
+                    <div class="stat-num" id="statHoy">0</div>
+                    <div class="stat-label">Registros hoy</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div>
+                        <div class="tc-title">Todos los registros</div>
+                        <div class="tc-sub">Datos sincronizados automáticamente</div>
+                    </div>
+                    <span class="tc-count" id="tc-monitor-count">0 registros</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Nombre</th><th>Usuario</th><th>Correo</th>
+                                <th>Contraseña</th><th>Rol</th><th>Fecha registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaRegistros">
+                            <tr><td colspan="7" class="empty">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ VIEW: USUARIOS ══════════ -->
+        <div class="view" id="view-usuarios">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Usuarios</div>
+                    <div class="page-subtitle">Listado de personas registradas en el sistema</div>
+                </div>
+                <span class="tc-count" id="tc-usu-count">0 usuarios</span>
+            </div>
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div>
+                        <div class="tc-title">Personas registradas</div>
+                        <div class="tc-sub">Solo cuentas con rol "usuario"</div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Nombre</th><th>Usuario</th><th>Correo</th>
+                                <th>Contraseña</th><th>Fecha registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuarios">
+                            <tr><td colspan="6" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ VIEW: EMPRESAS ══════════ -->
+        <div class="view" id="view-empresas">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Empresas</div>
+                    <div class="page-subtitle">Cuentas empresariales registradas en el sistema</div>
+                </div>
+                <span class="tc-count" id="tc-emp-count">0 empresas</span>
+            </div>
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div>
+                        <div class="tc-title">Empresas registradas</div>
+                        <div class="tc-sub">Solo cuentas con rol "empresa"</div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Nombre</th><th>Usuario</th><th>Correo</th>
+                                <th>Contraseña</th><th>Fecha registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEmpresas">
+                            <tr><td colspan="6" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ VIEW: CONFIGURACIÓN ══════════ -->
+        <div class="view" id="view-config">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Configuración</div>
+                    <div class="page-subtitle">Ajustes generales del sistema WorkFlow</div>
+                </div>
+            </div>
+            <div class="config-grid">
+
+                <div class="config-card">
+                    <div class="config-card-title">Configuración del sistema</div>
+                    <div class="config-card-sub">Parámetros generales de la plataforma</div>
+                    <div class="form-group">
+                        <label class="form-label">URL de la API</label>
+                        <input class="form-input" type="text" id="cfg-api-url" value="http://localhost:3000/api">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Intervalo de actualización (segundos)</label>
+                        <input class="form-input" type="number" id="cfg-interval" value="5" min="2" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la aplicación</label>
+                        <input class="form-input" type="text" value="WorkFlow Admin">
+                    </div>
+                    <button class="btn-save" onclick="guardarConfig()">Guardar cambios</button>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-card-title">Notificaciones</div>
+                    <div class="config-card-sub">Controla qué eventos generan alertas</div>
+                    <div class="form-toggle">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Nuevo registro</div>
+                            <div class="toggle-sub">Alerta cuando se registra un nuevo usuario</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="form-toggle">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Nueva empresa</div>
+                            <div class="toggle-sub">Alerta cuando se registra una empresa</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="form-toggle">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Error de conexión</div>
+                            <div class="toggle-sub">Alerta si el servidor no responde</div>
+                        </div>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="form-toggle">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Modo silencioso</div>
+                            <div class="toggle-sub">Desactiva todos los sonidos</div>
+                        </div>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-card-title">Seguridad</div>
+                    <div class="config-card-sub">Acceso y permisos del panel admin</div>
+                    <div class="form-group">
+                        <label class="form-label">Contraseña actual</label>
+                        <input class="form-input" type="password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nueva contraseña</label>
+                        <input class="form-input" type="password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirmar contraseña</label>
+                        <input class="form-input" type="password" placeholder="••••••••">
+                    </div>
+                    <button class="btn-save">Actualizar contraseña</button>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-card-title">Visualización</div>
+                    <div class="config-card-sub">Preferencias de la interfaz</div>
+                    <div class="form-group">
+                        <label class="form-label">Filas por página</label>
+                        <select class="form-select">
+                            <option>25 filas</option>
+                            <option selected>50 filas</option>
+                            <option>100 filas</option>
+                            <option>Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Zona horaria</label>
+                        <select class="form-select">
+                            <option>América/Guatemala (UTC-6)</option>
+                            <option>América/Mexico_City (UTC-6)</option>
+                            <option>América/Bogota (UTC-5)</option>
+                        </select>
+                    </div>
+                    <div class="form-toggle">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Mostrar contraseñas</div>
+                            <div class="toggle-sub">Visible en la tabla de registros</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════ VIEW: REPORTES ══════════ -->
+        <div class="view" id="view-reportes">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Reportes</div>
+                    <div class="page-subtitle">Resumen estadístico de los datos del sistema</div>
+                </div>
+            </div>
+
+            <div class="report-grid">
+
+                <div class="report-card">
+                    <div class="report-card-title">
+                        <svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Distribución por rol
+                    </div>
+                    <div class="donut-wrap">
+                        <svg class="donut-svg" width="80" height="80" viewBox="0 0 80 80" id="donut-svg">
+                            <circle cx="40" cy="40" r="28" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+                            <circle cx="40" cy="40" r="28" fill="none" stroke="#2563eb" stroke-width="12"
+                                stroke-dasharray="0 176" stroke-dashoffset="44" stroke-linecap="round"
+                                style="transition:stroke-dasharray 0.8s" id="donut-usuarios"/>
+                            <circle cx="40" cy="40" r="28" fill="none" stroke="#d97706" stroke-width="12"
+                                stroke-dasharray="0 176" stroke-dashoffset="44" stroke-linecap="round"
+                                style="transition:stroke-dasharray 0.8s" id="donut-empresas"/>
+                        </svg>
+                        <div class="donut-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#2563eb"></div>
+                                <span class="legend-name">Usuarios</span>
+                                <span class="legend-val" id="rep-usu-val">0</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#d97706"></div>
+                                <span class="legend-name">Empresas</span>
+                                <span class="legend-val" id="rep-emp-val">0</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#16a34a"></div>
+                                <span class="legend-name">Admin</span>
+                                <span class="legend-val" id="rep-adm-val">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-card-title">
+                        <svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Resumen general
+                    </div>
+                    <div class="stat-rows">
+                        <div class="stat-row">
+                            <span class="stat-row-label">Total registros</span>
+                            <span class="stat-row-val" id="rep-total" style="color:var(--green)">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-row-label">Registros hoy</span>
+                            <span class="stat-row-val" id="rep-hoy" style="color:var(--primary)">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-row-label">% Usuarios vs Empresas</span>
+                            <span class="stat-row-val" id="rep-ratio" style="color:var(--amber);font-size:0.95rem">—</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tabla resumen últimos 10 -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div>
+                        <div class="tc-title">Últimos 10 registros</div>
+                        <div class="tc-sub">Los más recientes en el sistema</div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Fecha registro</th></tr>
+                        </thead>
+                        <tbody id="tablaUltimos">
+                            <tr><td colspan="5" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+    const API = '/api';
+    let ultimosIds = new Set();
+    let allRegistros = [];
+
+    /* ── NAVIGATION ── */
+    const navItems   = document.querySelectorAll('.nav-item[data-view]');
+    const views      = document.querySelectorAll('.view');
+    const topbarTitle = document.getElementById('topbar-title');
+
+    const viewTitles = {
+        monitor:  'Monitor en vivo',
+        usuarios: 'Usuarios',
+        empresas: 'Empresas',
+        config:   'Configuración',
+        reportes: 'Reportes'
+    };
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            views.forEach(v => v.classList.remove('active'));
+            item.classList.add('active');
+            const viewId = item.dataset.view;
+            document.getElementById('view-' + viewId).classList.add('active');
+            topbarTitle.textContent = viewTitles[viewId] || viewId;
+            if (viewId !== 'monitor') renderSecundarias();
+        });
+    });
+
+    /* ── HELPERS ── */
+    function formatFecha(fecha) {
+        if (!fecha) return '—';
+        const d = new Date(fecha);
+        return d.toLocaleDateString('es-ES') + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function getRolBadge(rol) {
+        if (rol === 'empresa') return '<span class="badge badge-empresa"><span class="bdot"></span>EMPRESA</span>';
+        if (rol === 'admin')   return '<span class="badge badge-admin"><span class="bdot"></span>ADMIN</span>';
+        return '<span class="badge badge-usuario"><span class="bdot"></span>PERSONA</span>';
+    }
+
+    function rowFull(r, esNuevo) {
+        return `<tr class="${esNuevo ? 'new-row' : ''}">
+            <td class="id-cell">#${r.id}</td>
+            <td class="name-cell">${r.nombre || '—'}</td>
+            <td>${r.usuario || '—'}</td>
+            <td>${r.correo || '—'}</td>
+            <td><span class="password-cell">${r.password_visible || '—'}</span></td>
+            <td>${getRolBadge(r.rol)}</td>
+            <td>${formatFecha(r.fecha_registro)}</td>
+        </tr>`;
+    }
+
+    function rowSinRol(r) {
+        return `<tr>
+            <td class="id-cell">#${r.id}</td>
+            <td class="name-cell">${r.nombre || '—'}</td>
+            <td>${r.usuario || '—'}</td>
+            <td>${r.correo || '—'}</td>
+            <td><span class="password-cell">${r.password_visible || '—'}</span></td>
+            <td>${formatFecha(r.fecha_registro)}</td>
+        </tr>`;
+    }
+
+    /* ── RENDER SECUNDARIAS ── */
+    function renderSecundarias() {
+        if (!allRegistros.length) return;
+
+        // Usuarios
+        const usu = allRegistros.filter(r => r.rol === 'usuario');
+        document.getElementById('tc-usu-count').textContent = usu.length + ' usuarios';
+        document.getElementById('tablaUsuarios').innerHTML =
+            usu.length ? usu.map(rowSinRol).join('') :
+            '<tr><td colspan="7" class="empty">No hay usuarios registrados aún.</td></tr>';
+
+        // Empresas
+        const emp = allRegistros.filter(r => r.rol === 'empresa');
+        document.getElementById('tc-emp-count').textContent = emp.length + ' empresas';
+        document.getElementById('tablaEmpresas').innerHTML =
+            emp.length ? emp.map(rowSinRol).join('') :
+            '<tr><td colspan="7" class="empty">No hay empresas registradas aún.</td></tr>';
+
+        // Reportes
+        const adm  = allRegistros.filter(r => r.rol === 'admin');
+        const hoy  = new Date().toDateString();
+        const hoyN = allRegistros.filter(r => new Date(r.fecha_registro).toDateString() === hoy).length;
+        const total = allRegistros.length;
+
+        document.getElementById('rep-usu-val').textContent = usu.length;
+        document.getElementById('rep-emp-val').textContent = emp.length;
+        document.getElementById('rep-adm-val').textContent = adm.length;
+        document.getElementById('rep-total').textContent   = total;
+        document.getElementById('rep-hoy').textContent     = hoyN;
+        document.getElementById('rep-ratio').textContent   = total ? Math.round((usu.length / total) * 100) + '% / ' + Math.round((emp.length / total) * 100) + '%' : '—';
+
+        // Donut
+        const circ = 2 * Math.PI * 28; // ~175.9
+        const usuPct = total ? (usu.length / total) * circ : 0;
+        const empPct = total ? (emp.length / total) * circ : 0;
+        document.getElementById('donut-usuarios').setAttribute('stroke-dasharray', usuPct + ' ' + circ);
+        document.getElementById('donut-empresas').setAttribute('stroke-dasharray', empPct + ' ' + circ);
+        document.getElementById('donut-empresas').setAttribute('stroke-dashoffset', 44 - usuPct);
+        // Últimos 10
+        const ultimos = [...allRegistros].reverse().slice(0, 10);
+        document.getElementById('tablaUltimos').innerHTML = ultimos.map(r => `
+            <tr>
+                <td class="id-cell">#${r.id}</td>
+                <td class="name-cell">${r.nombre || '—'}</td>
+                <td>${r.correo || '—'}</td>
+                <td>${getRolBadge(r.rol)}</td>
+                <td>${formatFecha(r.fecha_registro)}</td>
+            </tr>`).join('');
+    }
+
+    /* ── LOAD DATA ── */
+    async function cargarDatos() {
+        try {
+            const res  = await fetch(`${API}/admin/monitor`);
+            const data = await res.json();
+            if (!data.registros) return;
+
+            const registros = data.registros;
+            allRegistros = registros;
+
+            const hoy = new Date().toDateString();
+            document.getElementById('statTotal').textContent    = registros.length;
+            document.getElementById('statUsuarios').textContent = registros.filter(r => r.rol === 'usuario').length;
+            document.getElementById('statEmpresas').textContent = registros.filter(r => r.rol === 'empresa').length;
+            document.getElementById('statHoy').textContent      = registros.filter(r => new Date(r.fecha_registro).toDateString() === hoy).length;
+            document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleTimeString('es-ES');
+
+            // sidebar badges
+            document.getElementById('nb-monitor').textContent  = registros.length;
+            document.getElementById('nb-usuarios').textContent = registros.filter(r => r.rol === 'usuario').length;
+            document.getElementById('nb-empresas').textContent = registros.filter(r => r.rol === 'empresa').length;
+
+            const tbody = document.getElementById('tablaRegistros');
+            document.getElementById('tc-monitor-count').textContent = registros.length + ' registros';
+
+            if (registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty">Aún no hay registros. Cuando alguien se registre aparecerá aquí.</td></tr>';
+            } else {
+                tbody.innerHTML = registros.map(r => rowFull(r, !ultimosIds.has(r.id))).join('');
+                ultimosIds = new Set(registros.map(r => r.id));
+            }
+
+            // si hay otra vista activa, actualizarla
+            const activeView = document.querySelector('.view.active');
+            if (activeView && activeView.id !== 'view-monitor') renderSecundarias();
+
+        } catch (err) {
+            document.getElementById('tablaRegistros').innerHTML =
+                '<tr><td colspan="7" class="empty">No se puede conectar al servidor. ¿Está corriendo node server.js?</td></tr>';
+            console.error("Error cargando datos:", err);
+        }
+    }
+
+    /* ── CONFIG SAVE ── */
+    function guardarConfig() {
+        alert('Configuración guardada correctamente.');
+    }
+
+    /* ── COUNTDOWN ── */
+    let segundos = 5;
+    setInterval(() => {
+        segundos--;
+        document.getElementById('countdown').textContent = segundos;
+        if (segundos <= 0) { segundos = 5; cargarDatos(); }
+    }, 1000);
+
+    cargarDatos();
+</script>
+</body>
+</html>
